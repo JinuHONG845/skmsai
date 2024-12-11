@@ -105,9 +105,11 @@ def stream_gemini_response(prompt, placeholder):
         )
         
         for chunk in response:
-            if chunk.text:
-                message += chunk.text
-                placeholder.markdown(message + "▌")
+            if hasattr(chunk, 'parts'):
+                for part in chunk.parts:
+                    if hasattr(part, 'text'):
+                        message += part.text
+                        placeholder.markdown(message + "▌")
         placeholder.markdown(message)
         return message
     except Exception as e:
