@@ -137,50 +137,46 @@ user_prompt = st.text_area("", height=100, key="user_input")
 
 if st.button("답변 생성하기"):
     if user_prompt:
-        # 이전 입력과 다른 경우 화면 초기화
+        # 이전 입력과 다른 경우에만 처리
         if user_prompt != st.session_state.previous_input:
-            st.empty()  # 기존 내용 초기화
-            st.title("SKMS AI Assistant")
-            st.write("SKMS를 기반으로 AI가 답변해드립니다. 여러분의 고민을 말씀해 주세요.")
-            st.text_area("", value=user_prompt, height=100, key="user_input_display")
             st.session_state.previous_input = user_prompt
-        
-        # ChatGPT 응답
-        st.subheader("ChatGPT 응답")
-        chatgpt_placeholder = st.empty()
-        chatgpt_response = stream_chatgpt_response(user_prompt, chatgpt_placeholder)
-        
-        # 구분선 추가
-        st.markdown("---")
-        
-        # Claude 응답
-        st.subheader("Claude 응답")
-        claude_placeholder = st.empty()
-        claude_response = stream_claude_response(user_prompt, claude_placeholder)
-        
-        # 구분선 추가
-        st.markdown("---")
-        
-        # Gemini 응답
-        st.subheader("Gemini 응답")
-        gemini_placeholder = st.empty()
-        gemini_response = stream_gemini_response(user_prompt, gemini_placeholder)
-        
-        # 구분선 추가
-        st.markdown("---")
-        
-        # 종합 분석
-        st.subheader("종합 분석")
-        synthesis_placeholder = st.empty()
-        
-        synthesis_prompt = f"""
-        원본 질문: {user_prompt}
+            
+            # ChatGPT 응답
+            st.subheader("ChatGPT 응답")
+            chatgpt_placeholder = st.empty()
+            chatgpt_response = stream_chatgpt_response(user_prompt, chatgpt_placeholder)
+            
+            # 구분선 추가
+            st.markdown("---")
+            
+            # Claude 응답
+            st.subheader("Claude 응답")
+            claude_placeholder = st.empty()
+            claude_response = stream_claude_response(user_prompt, claude_placeholder)
+            
+            # 구분선 추가
+            st.markdown("---")
+            
+            # Gemini 응답
+            st.subheader("Gemini 응답")
+            gemini_placeholder = st.empty()
+            gemini_response = stream_gemini_response(user_prompt, gemini_placeholder)
+            
+            # 구분선 추가
+            st.markdown("---")
+            
+            # 종합 분석
+            st.subheader("종합 분석")
+            synthesis_placeholder = st.empty()
+            
+            synthesis_prompt = f"""
+            원본 질문: {user_prompt}
 
-        ChatGPT의 답변: {chatgpt_response}
-        
-        Claude의 답변: {claude_response}
-        
-        Gemini의 답변: {gemini_response}
-        """
-        
-        get_final_synthesis(synthesis_prompt, synthesis_placeholder) 
+            ChatGPT의 답변: {chatgpt_response}
+            
+            Claude의 답변: {claude_response}
+            
+            Gemini의 답변: {gemini_response}
+            """
+            
+            get_final_synthesis(synthesis_prompt, synthesis_placeholder) 
