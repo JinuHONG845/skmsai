@@ -98,18 +98,20 @@ def get_final_synthesis(prompt, placeholder):
         with anthropic_client.messages.stream(
             model="claude-3-sonnet-20240229",
             max_tokens=1000,
+            system="""당신은 SKMS 전문가입니다.
+            각 AI의 답변들을 종합하여 SKMS의 관점에서 가장 핵심적이고 통찰력 있는 답변을 제시해주세요.
+            답변 시 SKMS의 철학과 가치를 자연스럽게 연결하여 설명해주세요.
+            여러 AI의 답변 중 중복되는 중요한 관점이나, 서로 보완되는 관점들을 잘 통합해서 설명해주세요.""",
             messages=[{
                 "role": "user",
                 "content": f"""
-                SKMS: {SKMS_CONTENT}
+                원본 질문: {prompt}
 
-                다음 답변들을 종합하여 가장 정확하고 실용적인 최종 답변을 제시해주세요:
-                {prompt}
+                ChatGPT의 답변: {chatgpt_response}
                 
-                답변 형식:
-                1. 핵심 요약
-                2. 주요 시사점
-                3. 실행 방안
+                Claude의 답변: {claude_response}
+                
+                Gemini의 답변: {gemini_response}
                 """
             }]
         ) as stream:
