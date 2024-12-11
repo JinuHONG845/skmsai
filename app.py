@@ -1,21 +1,23 @@
 import streamlit as st
 import openai
+from anthropic import Anthropic
 from google.cloud import aiplatform
 import os
-import json
-from anthropic import Anthropic
+
+# Streamlit 페이지 설정
+st.set_page_config(page_title="SKMS AI Assistant", layout="wide")
 
 # API 키 설정
 openai.api_key = st.secrets["OPENAI_API_KEY"]
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = st.secrets["GOOGLE_APPLICATION_CREDENTIALS"]
-anthropic = Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
+anthropic_client = Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
 
+# 각 AI 모델의 응답을 가져오는 함수들
 def get_chatgpt_response(prompt):
     try:
         response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=[
-                {"role": "system", "content": "You are an AI assistant that helps answer questions about SKMS using the 4O model (Objective, Obstacle, Options, Output)."},
+                {"role": "system", "content": "SKMS 관련 질문에 4O 모델(Objective, Obstacle, Options, Output)을 사용하여 답변해주세요."},
                 {"role": "user", "content": prompt}
             ]
         )
@@ -23,55 +25,67 @@ def get_chatgpt_response(prompt):
     except Exception as e:
         return f"ChatGPT Error: {str(e)}"
 
+def get_claude_response(prompt):
+    try:
+        message = anthropic_client.messages.create(
+            model="claude-3-sonnet-20240229",
+            max_tokens=1000,
+            messages=[{
+                "role": "user",
+                "content": prompt
+            }]
+        )
+        return message.content
+    except Exception as e:
+        return f"Claude Error: {str(e)}"
+
 def get_gemini_response(prompt):
     try:
         aiplatform.init(project=st.secrets["GOOGLE_CLOUD_PROJECT"])
-        
         model = aiplatform.Model("models/text-bison@001")
         response = model.predict(prompt)
         return response.predictions[0]
     except Exception as e:
         return f"Gemini Error: {str(e)}"
 
-def get_claude_response(prompt, chatgpt_response, gemini_response):
-    try:
-        message = anthropic.messages.create(
-            model="claude-3-sonnet-20240229",
-            max_tokens=1000,
-            messages=[
-                {
-                    "role": "user",
-                    "content": f"Analyze and synthesize these responses about SKMS:\n\nChatGPT: {chatgpt_response}\n\nGemini: {gemini_response}\n\nOriginal question: {prompt}"
-                }
-            ]
-        )
-        return message.content
-    except Exception as e:
-        return f"Claude Error: {str(e)}"
-
 # Streamlit UI
 st.title("SK Management System (SKMS) AI Assistant")
+st.write("SKMS에 대해 궁금한 점을 질문해주세요.")
 
-# User input
-user_prompt = st.text_input("Ask a question about SKMS:")
+# 사용자 입력
+user_prompt = st.text_input("질문을 입력하세요:", key="user_input")
 
 if user_prompt:
-    # Get responses from all models
-    with st.spinner("Getting responses from AI models..."):
-        chatgpt_response = get_chatgpt_response(user_prompt)
-        gemini_response = get_gemini_response(user_prompt)
+    with st.spinner("AI 모델들이 응답을 생성중입니다..."):
+        # 각 모델의 응답 가져오기
+        col1, col2, col3 = st.columns(3)
         
-        # Get Claude's synthesis
-        claude_synthesis = get_claude_response(user_prompt, chatgpt_response, gemini_response)
-    
-    # Display individual responses
-    with st.expander("View Individual AI Responses"):
-        st.subheader("ChatGPT Response (4O Model)")
-        st.write(chatgpt_response)
+        with col1:
+            st.subheader("ChatGPT 응답")
+            chatgpt_response = get_chatgpt_response(user_prompt)
+            st.write(chatgpt_response)
+            
+        with col2:
+            st.subheader("Claude 응답")
+            claude_response = get_claude_response(user_prompt)
+            st.write(claude_response)
+            
+        with col3:
+            st.subheader("Gemini 응답")
+            gemini_response = get_gemini_response(user_prompt)
+            st.write(gemini_response)
         
-        st.subheader("Gemini Pro Response")
-        st.write(gemini_response)
-    
-    # Display final synthesis
-    st.subheader("Final Synthesis by Claude")
-    st.write(claude_synthesis) 
+        # 종합 분석
+        st.subheader("종합 분석")
+        synthesis_prompt = f"""
+        다음 세 AI의 SKMS 관련 응답을 분석하고 종합해주세요:
+        
+        ChatGPT: {chatgpt_response}
+        Claude: {claude_response}
+        Gemini: {gemini_response}
+        
+        원본 질문: {user_prompt}
+        """
+        
+        final_synthesis = get_claude_response(synthesis_prompt)
+        st.write(final_synthesis) 
