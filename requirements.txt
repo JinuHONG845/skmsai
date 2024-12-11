@@ -3,3 +3,4 @@ openai
 anthropic
 google-cloud-aiplatform
 python-dotenv 
+google-generativeai==0.3.2 
