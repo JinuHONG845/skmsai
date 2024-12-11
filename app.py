@@ -21,7 +21,10 @@ def stream_chatgpt_response(prompt, placeholder):
         stream = openai_client.chat.completions.create(
             model="gpt-4",
             messages=[
-                {"role": "system", "content": "당신은 SKMS 전문가입니다. 아래의 SKMS를 기반으로 질문에 답변해주세요. 4O 모델(Objective, Obstacle, Options, Output)을 사용하여 답변해주세요."},
+                {"role": "system", "content": """당신은 SKMS 전문가입니다. 
+                반드시 주어진 SKMS 문서의 내용만을 기반으로 답변해주세요. 
+                SKMS에 명시되지 않은 일반적인 내용은 포함하지 마세요.
+                답변의 각 내용에 대해 SKMS의 어느 부분을 참고했는지 명시해주세요."""},
                 {"role": "user", "content": f"SKMS: {SKMS_CONTENT}\n\n질문: {prompt}"}
             ],
             stream=True
@@ -42,7 +45,10 @@ def stream_claude_response(prompt, placeholder):
         with anthropic_client.messages.stream(
             model="claude-3-sonnet-20240229",
             max_tokens=1000,
-            system="당신은 SKMS 전문가입니다. 아래의 SKMS를 기반으로 질문에 답변해주세요.",
+            system="""당신은 SKMS 전문가입니다. 
+            반드시 주어진 SKMS 문서의 내용만을 기반으로 답변해주세요. 
+            SKMS에 명시되지 않은 일반적인 내용은 포함하지 마세요.
+            답변의 각 내용에 대해 SKMS의 어느 부분을 참고했는지 명시해주세요.""",
             messages=[{
                 "role": "user",
                 "content": f"SKMS: {SKMS_CONTENT}\n\n질문: {prompt}"
@@ -62,7 +68,10 @@ def stream_gemini_response(prompt, placeholder):
         message = ""
         model = genai.GenerativeModel('gemini-pro')
         response = model.generate_content(
-            f"""당신은 SKMS 전문가입니다. 아래의 SKMS를 기반으로 질문에 답변해주세요.
+            f"""당신은 SKMS 전문가입니다. 
+            반드시 아래 주어진 SKMS 문서의 내용만을 기반으로 답변해주세요. 
+            SKMS에 명시되지 않은 일반적인 내용은 포함하지 마세요.
+            답변의 각 내용에 대해 SKMS의 어느 부분을 참고했는지 명시해주세요.
             
             SKMS: {SKMS_CONTENT}
             
@@ -111,8 +120,8 @@ def get_final_synthesis(prompt, placeholder):
         return f"Synthesis Error: {str(e)}"
 
 # Streamlit UI
-st.title("SK Management System (SKMS) AI Assistant")
-st.write("SKMS에 대해 궁금한 점을 질문해주세요.")
+st.title("SKMS AI Assistant")
+st.write("SKMS의 내용을 기반으로 AI가 답변해드립니다.")
 
 # 사용자 입력
 user_prompt = st.text_input("질문을 입력하세요:", key="user_input")
