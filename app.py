@@ -3,8 +3,8 @@ from openai import OpenAI
 from anthropic import Anthropic
 import google.generativeai as genai
 
-# Streamlit 페이지 설정
-st.set_page_config(page_title="SKMS AI Assistant", layout="wide")
+# 페이지 레이아웃 설정
+st.set_page_config(layout="centered", page_title="SKMS AI Assistant")
 
 # SKMS 문서 로드
 with open('skms.txt', 'r', encoding='utf-8') as file:
@@ -18,6 +18,11 @@ genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 # 상단에 CSS 스타일 추가
 st.markdown("""
     <style>
+    .main > div {
+        max-width: 800px;
+        padding-left: 100px;
+        padding-right: 100px;
+    }
     .llm-header {
         color: #1f77b4;
         font-size: 1.2em;
@@ -96,7 +101,7 @@ def stream_gemini_response(prompt, placeholder):
             답변 시에는 친근하고 이해하기 쉬운 표현을 사용하되, 전문성은 유지해주세요.
             질문에 대한 직접적인 내용이 SKMS에 없더라도, SKMS의 경영철학과 핵심가치를 바탕으로 
             건설적이고 희망적인 관점에서 답변을 제공해주세요.
-            답변 시 참고한 SKMS의 관련 내용이나 철학을 자연스럽게 연결하여 설명해주세요.
+            답변 시 참고한 SKMS의 관련 내용이나 철학을 자연스���게 연결하여 설명해주세요.
             
             SKMS: {SKMS_CONTENT}
             
@@ -196,4 +201,11 @@ if st.button("답변 생성하기"):
             Gemini의 답변: {gemini_response}
             """
             
-            get_final_synthesis(synthesis_prompt, synthesis_placeholder) 
+            get_final_synthesis(synthesis_prompt, synthesis_placeholder)
+            
+            # 종합 답변 후 로고 표시
+            st.markdown('<div style="margin-top: 50px; text-align: center;">', unsafe_allow_html=True)
+            col1, col2, col3 = st.columns([1, 1, 1])
+            with col2:
+                st.image("1200px-SK_logo.svg.png", width=100)
+            st.markdown('</div>', unsafe_allow_html=True) 
