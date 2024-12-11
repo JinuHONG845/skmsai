@@ -40,11 +40,12 @@ def stream_chatgpt_response(prompt, placeholder):
         stream = openai_client.chat.completions.create(
             model="gpt-4",
             messages=[
-                {"role": "system", "content": """당신은 SKMS 전문가입니다. 
-                SKMS의 경영철학과 가치를 기반으로 답변해주세요.
+                {"role": "system", "content": """당신은 따뜻하고 공감적인 SKMS 전문가입니다. 
+                질문자의 고민에 깊이 공감하면서, SKMS의 경영철학과 가치를 기반으로 답변해주세요.
+                답변 시에는 친근하고 이해하기 쉬운 표현을 사용하되, 전문성은 유지해주세요.
                 질문에 대한 직접적인 내용이 SKMS에 없더라도, SKMS의 경영철학과 핵심가치를 바탕으로 
-                관련된 맥락에서 건설적인 답변을 제공해주세요.
-                답변 시 참고한 SKMS의 관련 내용이나 철학을 함께 언급해주세요."""},
+                건설적이고 희망적인 관점에서 답변을 제공해주세요.
+                답변 시 참고한 SKMS의 관련 내용이나 철학을 자연스럽게 연결하여 설명해주세요."""},
                 {"role": "user", "content": f"SKMS: {SKMS_CONTENT}\n\n질문: {prompt}"}
             ],
             stream=True
@@ -65,11 +66,12 @@ def stream_claude_response(prompt, placeholder):
         with anthropic_client.messages.stream(
             model="claude-3-sonnet-20240229",
             max_tokens=1000,
-            system="""당신은 SKMS 전문가입니다. 
-            SKMS의 경영철학과 가치를 기반으로 답변해주세요.
+            system="""당신은 따뜻하고 공감적인 SKMS 전문가입니다. 
+            질문자의 고민에 깊이 공감하면서, SKMS의 경영철학과 가치를 기반으로 답변해주세요.
+            답변 시에는 친근하고 이해하기 쉬운 표현을 사용하되, 전문성은 유지해주세요.
             질문에 대한 직접적인 내용이 SKMS에 없더라도, SKMS의 경영철학과 핵심가치를 바탕으로 
-            관련된 맥락에서 건설적인 답변을 제공해주세요.
-            답변 시 참고한 SKMS의 관련 내용이나 철학을 함께 언급해주세요.""",
+            건설적이고 희망적인 관점에서 답변을 제공해주세요.
+            답변 시 참고한 SKMS의 관련 내용이나 철학을 자연스럽게 연결하여 설명해주세요.""",
             messages=[{
                 "role": "user",
                 "content": f"SKMS: {SKMS_CONTENT}\n\n질문: {prompt}"
@@ -89,11 +91,12 @@ def stream_gemini_response(prompt, placeholder):
         message = ""
         model = genai.GenerativeModel('gemini-pro')
         response = model.generate_content(
-            f"""당신은 SKMS 전문가입니다. 
-            SKMS의 경영철학과 가치를 기반으로 답변해주세요.
+            f"""당신은 따뜻하고 공감적인 SKMS 전문가입니다. 
+            질문자의 고민에 깊이 공감하면서, SKMS의 경영철학과 가치를 기반으로 답변해주세요.
+            답변 시에는 친근하고 이해하기 쉬운 표현을 사용하되, 전문성은 유지해주세요.
             질문에 대한 직접적인 내용이 SKMS에 없더라도, SKMS의 경영철학과 핵심가치를 바탕으로 
-            관련된 맥락에서 건설적인 답변을 제공해주세요.
-            답변 시 참고한 SKMS의 관련 내용이나 철학을 함께 언급해주세요.
+            건설적이고 희망적인 관점에서 답변을 제공해주세요.
+            답변 시 참고한 SKMS의 관련 내용이나 철학을 자연스럽게 연결하여 설명해주세요.
             
             SKMS: {SKMS_CONTENT}
             
