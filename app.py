@@ -35,7 +35,17 @@ def get_claude_response(prompt):
                 "content": prompt
             }]
         )
-        return message.content
+        
+        # content가 리스트이고 첫 번째 요소가 있는지 확인
+        if message.content and len(message.content) > 0:
+            # text 속성이 있는지 확인
+            if hasattr(message.content[0], 'text'):
+                return message.content[0].text
+            # 직접 텍스트 값에 접근 시도
+            elif isinstance(message.content[0], dict) and 'text' in message.content[0]:
+                return message.content[0]['text']
+        
+        return "응답을 처리할 수 없습니다."
     except Exception as e:
         return f"Claude Error: {str(e)}"
 
@@ -50,7 +60,7 @@ def get_gemini_response(prompt):
 
 # Streamlit UI
 st.title("SK Management System (SKMS) AI Assistant")
-st.write("SKMS에 대해 궁금한 ��을 질문해주세요.")
+st.write("SKMS에 대해 궁금한 을 질문해주세요.")
 
 # 사용자 입력
 user_prompt = st.text_input("질문을 입력하세요:", key="user_input")
