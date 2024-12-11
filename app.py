@@ -162,20 +162,20 @@ if st.button("답변 생성하기"):
         if user_prompt != st.session_state.previous_input:
             st.session_state.previous_input = user_prompt
             
-            # ChatGPT 응답
-            st.markdown('<div class="llm-header">ChatGPT 응답</div>', unsafe_allow_html=True)
+            # ChatGPT 답변
+            st.markdown('<div class="llm-header">ChatGPT 답변</div>', unsafe_allow_html=True)
             chatgpt_placeholder = st.empty()
             chatgpt_response = stream_chatgpt_response(user_prompt, chatgpt_placeholder)
             st.markdown('<div class="response-divider"></div>', unsafe_allow_html=True)
             
-            # Claude 응답
-            st.markdown('<div class="llm-header">Claude 응답</div>', unsafe_allow_html=True)
+            # Claude 답변
+            st.markdown('<div class="llm-header">Claude 답변</div>', unsafe_allow_html=True)
             claude_placeholder = st.empty()
             claude_response = stream_claude_response(user_prompt, claude_placeholder)
             st.markdown('<div class="response-divider"></div>', unsafe_allow_html=True)
             
-            # Gemini 응답
-            st.markdown('<div class="llm-header">Gemini 응답</div>', unsafe_allow_html=True)
+            # Gemini 답변
+            st.markdown('<div class="llm-header">Gemini 답변</div>', unsafe_allow_html=True)
             gemini_placeholder = st.empty()
             gemini_response = stream_gemini_response(user_prompt, gemini_placeholder)
             st.markdown('<div class="response-divider"></div>', unsafe_allow_html=True)
