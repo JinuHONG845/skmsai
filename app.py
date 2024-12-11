@@ -22,9 +22,10 @@ def stream_chatgpt_response(prompt, placeholder):
             model="gpt-4",
             messages=[
                 {"role": "system", "content": """당신은 SKMS 전문가입니다. 
-                반드시 주어진 SKMS 문서의 내용만을 기반으로 답변해주세요. 
-                SKMS에 명시되지 않은 일반적인 내용은 포함하지 마세요.
-                답변의 각 내용에 대해 SKMS의 어느 부분을 참고했는지 명시해주세요."""},
+                SKMS의 경영철학과 가치를 기반으로 답변해주세요.
+                질문에 대한 직접적인 내용이 SKMS에 없더라도, SKMS의 경영철학과 핵심가치를 바탕으로 
+                관련된 맥락에서 건설적인 답변을 제공해주세요.
+                답변 시 참고한 SKMS의 관련 내용이나 철학을 함께 언급해주세요."""},
                 {"role": "user", "content": f"SKMS: {SKMS_CONTENT}\n\n질문: {prompt}"}
             ],
             stream=True
@@ -46,9 +47,10 @@ def stream_claude_response(prompt, placeholder):
             model="claude-3-sonnet-20240229",
             max_tokens=1000,
             system="""당신은 SKMS 전문가입니다. 
-            반드시 주어진 SKMS 문서의 내용만을 기반으로 답변해주세요. 
-            SKMS에 명시되지 않은 일반적인 내용은 포함하지 마세요.
-            답변의 각 내용에 대해 SKMS의 어느 부분을 참고했는지 명시해주세요.""",
+            SKMS의 경영철학과 가치를 기반으로 답변해주세요.
+            질문에 대한 직접적인 내용이 SKMS에 없더라도, SKMS의 경영철학과 핵심가치를 바탕으로 
+            관련된 맥락에서 건설적인 답변을 제공해주세요.
+            답변 시 참고한 SKMS의 관련 내용이나 철학을 함께 언급해주세요.""",
             messages=[{
                 "role": "user",
                 "content": f"SKMS: {SKMS_CONTENT}\n\n질문: {prompt}"
@@ -69,9 +71,10 @@ def stream_gemini_response(prompt, placeholder):
         model = genai.GenerativeModel('gemini-pro')
         response = model.generate_content(
             f"""당신은 SKMS 전문가입니다. 
-            반드시 아래 주어진 SKMS 문서의 내용만을 기반으로 답변해주세요. 
-            SKMS에 명시되지 않은 일반적인 내용은 포함하지 마세요.
-            답변의 각 내용에 대해 SKMS의 어느 부분을 참고했는지 명시해주세요.
+            SKMS의 경영철학과 가치를 기반으로 답변해주세요.
+            질문에 대한 직접적인 내용이 SKMS에 없더라도, SKMS의 경영철학과 핵심가치를 바탕으로 
+            관련된 맥락에서 건설적인 답변을 제공해주세요.
+            답변 시 참고한 SKMS의 관련 내용이나 철학을 함께 언급해주세요.
             
             SKMS: {SKMS_CONTENT}
             
@@ -128,7 +131,7 @@ user_prompt = st.text_input("질문을 입력하세요:", key="user_input")
 
 if user_prompt:
     # ChatGPT 응답
-    st.subheader("ChatGPT 응답 (4O 모델)")
+    st.subheader("ChatGPT 응답")
     chatgpt_placeholder = st.empty()
     chatgpt_response = stream_chatgpt_response(user_prompt, chatgpt_placeholder)
     
@@ -158,7 +161,7 @@ if user_prompt:
     synthesis_prompt = f"""
     원본 질문: {user_prompt}
 
-    ChatGPT의 답변: {chatgpt_response}
+    ChatGPT의 ���변: {chatgpt_response}
     
     Claude의 답변: {claude_response}
     
