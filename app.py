@@ -15,6 +15,25 @@ openai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 anthropic_client = Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 
+# 상단에 CSS 스타일 추가
+st.markdown("""
+    <style>
+    .llm-response {
+        background-color: #f0f2f6;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 10px 0;
+    }
+    .llm-header {
+        color: #0e1117;
+        font-size: 1.3em;
+        margin-bottom: 15px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #6c757d;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 def stream_chatgpt_response(prompt, placeholder):
     try:
         message = ""
@@ -137,36 +156,33 @@ user_prompt = st.text_area("", height=100, key="user_input")
 
 if st.button("답변 생성하기"):
     if user_prompt:
-        # 이전 입력과 다른 경우에만 처리
         if user_prompt != st.session_state.previous_input:
             st.session_state.previous_input = user_prompt
             
             # ChatGPT 응답
-            st.subheader("ChatGPT 응답")
+            st.markdown('<div class="llm-response">', unsafe_allow_html=True)
+            st.markdown('<div class="llm-header">ChatGPT 응답</div>', unsafe_allow_html=True)
             chatgpt_placeholder = st.empty()
             chatgpt_response = stream_chatgpt_response(user_prompt, chatgpt_placeholder)
-            
-            # 구분선 추가
-            st.markdown("---")
+            st.markdown('</div>', unsafe_allow_html=True)
             
             # Claude 응답
-            st.subheader("Claude 응답")
+            st.markdown('<div class="llm-response">', unsafe_allow_html=True)
+            st.markdown('<div class="llm-header">Claude 응답</div>', unsafe_allow_html=True)
             claude_placeholder = st.empty()
             claude_response = stream_claude_response(user_prompt, claude_placeholder)
-            
-            # 구분선 추가
-            st.markdown("---")
+            st.markdown('</div>', unsafe_allow_html=True)
             
             # Gemini 응답
-            st.subheader("Gemini 응답")
+            st.markdown('<div class="llm-response">', unsafe_allow_html=True)
+            st.markdown('<div class="llm-header">Gemini 응답</div>', unsafe_allow_html=True)
             gemini_placeholder = st.empty()
             gemini_response = stream_gemini_response(user_prompt, gemini_placeholder)
+            st.markdown('</div>', unsafe_allow_html=True)
             
-            # 구분선 추가
-            st.markdown("---")
-            
-            # 종합 분석
-            st.subheader("종합 분석")
+            # 종합 답변
+            st.markdown('<div class="llm-response">', unsafe_allow_html=True)
+            st.markdown('<div class="llm-header">종합 답변</div>', unsafe_allow_html=True)
             synthesis_placeholder = st.empty()
             
             synthesis_prompt = f"""
@@ -179,4 +195,5 @@ if st.button("답변 생성하기"):
             Gemini의 답변: {gemini_response}
             """
             
-            get_final_synthesis(synthesis_prompt, synthesis_placeholder) 
+            get_final_synthesis(synthesis_prompt, synthesis_placeholder)
+            st.markdown('</div>', unsafe_allow_html=True) 
