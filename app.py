@@ -101,19 +101,13 @@ def stream_gemini_response(prompt, placeholder):
             SKMS: {SKMS_CONTENT}
             
             질문: {prompt}""",
-            generation_config=genai.types.GenerationConfig(
-                candidate_count=1,
-                max_output_tokens=2048,
-                temperature=0.7
-            )
+            stream=True
         )
         
-        # 스트리밍 대신 직접 응답 처리
-        if response.candidates:
-            for part in response.candidates[0].content.parts:
-                if hasattr(part, 'text'):
-                    message += part.text
-        
+        for chunk in response:
+            if chunk.text:
+                message += chunk.text
+                placeholder.markdown(message + "▌")
         placeholder.markdown(message)
         return message
     except Exception as e:
