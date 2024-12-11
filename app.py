@@ -1,5 +1,5 @@
 import streamlit as st
-import openai
+from openai import OpenAI
 from anthropic import Anthropic
 from google.cloud import aiplatform
 import os
@@ -7,14 +7,14 @@ import os
 # Streamlit 페이지 설정
 st.set_page_config(page_title="SKMS AI Assistant", layout="wide")
 
-# API 키 설정
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+# API 키라이언트 초기화
+openai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 anthropic_client = Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
 
 # 각 AI 모델의 응답을 가져오는 함수들
 def get_chatgpt_response(prompt):
     try:
-        response = openai.ChatCompletion.create(
+        response = openai_client.chat.completions.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": "SKMS 관련 질문에 4O 모델(Objective, Obstacle, Options, Output)을 사용하여 답변해주세요."},
@@ -50,7 +50,7 @@ def get_gemini_response(prompt):
 
 # Streamlit UI
 st.title("SK Management System (SKMS) AI Assistant")
-st.write("SKMS에 대해 궁금한 점을 질문해주세요.")
+st.write("SKMS에 대해 궁금한 ��을 질문해주세요.")
 
 # 사용자 입력
 user_prompt = st.text_input("질문을 입력하세요:", key="user_input")
