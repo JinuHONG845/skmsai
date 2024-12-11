@@ -1,6 +1,7 @@
 import streamlit as st
 from openai import OpenAI
 from anthropic import Anthropic
+import google.generativeai as genai
 
 # Streamlit 페이지 설정
 st.set_page_config(page_title="SKMS AI Assistant", layout="wide")
@@ -12,6 +13,7 @@ with open('skms.txt', 'r', encoding='utf-8') as file:
 # API 클라이언트 초기화
 openai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 anthropic_client = Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
+genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 
 def stream_chatgpt_response(prompt, placeholder):
     try:
@@ -40,10 +42,8 @@ def stream_claude_response(prompt, placeholder):
         with anthropic_client.messages.stream(
             model="claude-3-sonnet-20240229",
             max_tokens=1000,
+            system="당신은 SKMS 전문가입니다. 아래의 SKMS를 기반으로 질문에 답변해주세요.",
             messages=[{
-                "role": "system",
-                "content": "당신은 SKMS 전문가입니다. 아래의 SKMS를 기반으로 질문에 답변해주세요."
-            }, {
                 "role": "user",
                 "content": f"SKMS: {SKMS_CONTENT}\n\n질문: {prompt}"
             }]
@@ -56,6 +56,29 @@ def stream_claude_response(prompt, placeholder):
     except Exception as e:
         placeholder.error(f"Claude Error: {str(e)}")
         return f"Claude Error: {str(e)}"
+
+def stream_gemini_response(prompt, placeholder):
+    try:
+        message = ""
+        model = genai.GenerativeModel('gemini-pro')
+        response = model.generate_content(
+            f"""당신은 SKMS 전문가입니다. 아래의 SKMS를 기반으로 질문에 답변해주세요.
+            
+            SKMS: {SKMS_CONTENT}
+            
+            질문: {prompt}""",
+            stream=True
+        )
+        
+        for chunk in response:
+            if chunk.text:
+                message += chunk.text
+                placeholder.markdown(message + "▌")
+        placeholder.markdown(message)
+        return message
+    except Exception as e:
+        placeholder.error(f"Gemini Error: {str(e)}")
+        return f"Gemini Error: {str(e)}"
 
 def get_final_synthesis(prompt, placeholder):
     try:
@@ -95,20 +118,26 @@ st.write("SKMS에 대해 궁금한 점을 질문해주세요.")
 user_prompt = st.text_input("질문을 입력하세요:", key="user_input")
 
 if user_prompt:
-    # 각 모델의 응답을 위한 컬럼 생성
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.subheader("ChatGPT 응답 (4O 모델)")
-        chatgpt_placeholder = st.empty()
-        
-    with col2:
-        st.subheader("Claude 응답")
-        claude_placeholder = st.empty()
-    
-    # 응답 생성
+    # ChatGPT 응답
+    st.subheader("ChatGPT 응답 (4O 모델)")
+    chatgpt_placeholder = st.empty()
     chatgpt_response = stream_chatgpt_response(user_prompt, chatgpt_placeholder)
+    
+    # 구분선 추가
+    st.markdown("---")
+    
+    # Claude 응답
+    st.subheader("Claude 응답")
+    claude_placeholder = st.empty()
     claude_response = stream_claude_response(user_prompt, claude_placeholder)
+    
+    # 구분선 추가
+    st.markdown("---")
+    
+    # Gemini 응답
+    st.subheader("Gemini 응답")
+    gemini_placeholder = st.empty()
+    gemini_response = stream_gemini_response(user_prompt, gemini_placeholder)
     
     # 구분선 추가
     st.markdown("---")
@@ -123,6 +152,8 @@ if user_prompt:
     ChatGPT의 답변: {chatgpt_response}
     
     Claude의 답변: {claude_response}
+    
+    Gemini의 답변: {gemini_response}
     """
     
     get_final_synthesis(synthesis_prompt, synthesis_placeholder) 
