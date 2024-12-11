@@ -126,8 +126,8 @@ def get_final_synthesis(prompt, placeholder):
 st.title("SKMS AI Assistant")
 st.write("SKMS의 내용을 기반으로 AI가 답변해드립니다.")
 
-# 사용자 입력
-user_prompt = st.text_input("질문을 입력하세요:", key="user_input")
+# 사용자 입력 (text_input을 text_area로 변경하고 height 설정)
+user_prompt = st.text_area("질문을 입력하세요:", height=100, key="user_input")
 
 if user_prompt:
     # ChatGPT 응답
@@ -161,7 +161,7 @@ if user_prompt:
     synthesis_prompt = f"""
     원본 질문: {user_prompt}
 
-    ChatGPT의 ���변: {chatgpt_response}
+    ChatGPT의 답변: {chatgpt_response}
     
     Claude의 답변: {claude_response}
     
