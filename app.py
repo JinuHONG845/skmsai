@@ -3,11 +3,12 @@ import openai
 from google.cloud import aiplatform
 import os
 import json
+from anthropic import Anthropic
 
 # API 키 설정
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = st.secrets["GOOGLE_APPLICATION_CREDENTIALS"]
-anthropic_api_key = st.secrets["ANTHROPIC_API_KEY"]
+anthropic = Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
 
 def get_chatgpt_response(prompt):
     try:
@@ -32,16 +33,19 @@ def get_gemini_response(prompt):
     except Exception as e:
         return f"Gemini Error: {str(e)}"
 
-def get_claude_response(prompt):
+def get_claude_response(prompt, chatgpt_response, gemini_response):
     try:
-        response = openai.ChatCompletion.create(
-            model="claude-3-sonnet",
+        message = anthropic.messages.create(
+            model="claude-3-sonnet-20240229",
+            max_tokens=1000,
             messages=[
-                {"role": "system", "content": "You are Claude 3.5 Sonnet. Your role is to analyze responses from ChatGPT and Gemini Pro, then provide a comprehensive synthesis."},
-                {"role": "user", "content": f"Analyze and synthesize these responses about SKMS:\n\nChatGPT: {chatgpt_response}\n\nGemini: {gemini_response}\n\nOriginal question: {prompt}"}
+                {
+                    "role": "user",
+                    "content": f"Analyze and synthesize these responses about SKMS:\n\nChatGPT: {chatgpt_response}\n\nGemini: {gemini_response}\n\nOriginal question: {prompt}"
+                }
             ]
         )
-        return response.choices[0].message.content
+        return message.content
     except Exception as e:
         return f"Claude Error: {str(e)}"
 
@@ -58,7 +62,7 @@ if user_prompt:
         gemini_response = get_gemini_response(user_prompt)
         
         # Get Claude's synthesis
-        claude_synthesis = get_claude_response(user_prompt)
+        claude_synthesis = get_claude_response(user_prompt, chatgpt_response, gemini_response)
     
     # Display individual responses
     with st.expander("View Individual AI Responses"):
