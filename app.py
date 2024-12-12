@@ -3,8 +3,8 @@ from openai import OpenAI
 from anthropic import Anthropic
 import google.generativeai as genai
 
-# 페이지 레이아웃 설정
-st.set_page_config(layout="centered", page_title="SKMS AI Assistant")
+# Streamlit 페이지 설정
+st.set_page_config(page_title="SKMS AI Assistant", layout="wide")
 
 # SKMS 문서 로드
 with open('skms.txt', 'r', encoding='utf-8') as file:
@@ -18,11 +18,6 @@ genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 # 상단에 CSS 스타일 추가
 st.markdown("""
     <style>
-    .main > div {
-        max-width: 800px;
-        padding-left: 100px;
-        padding-right: 100px;
-    }
     .llm-header {
         color: #1f77b4;
         font-size: 1.2em;
@@ -39,23 +34,18 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-def get_prompt(question, skms_content):
-    prompt = f"""
-    당신은 SK그룹의 SKMS(SK Management System) 전문가입니다.
-    아래의 SKMS 내용을 기반으로 질문에 답변해주세요.
-    
-    규칙:
-    1. 최소 2개 이상의 다른 응답들과 공통되는 관점을 중심으로 답변하세요.
-    2. SKMS 원문의 내용과 모순되지 않도록 답변하세요.
-    
-    SKMS 내용:
-    {skms_content}
-    
-    질문: {question}
-    
-    위 질문에 대해 SKMS 내용을 기반으로 답변해주세요.
-    """
-    return prompt
+# 상단에 로고 배치
+col1, col2 = st.columns([1, 4])
+
+with col1:
+    st.image("1200px-SK_logo.svg.png", width=100)
+
+# 메인 타이틀과 설명
+st.title("SKMS AI Assistant")
+st.write("SKMS를 기반으로 AI가 답변해드립니다. 여러분의 고민을 말씀해 주세요.")
+
+# 사용자 입력과 버튼
+user_prompt = st.text_area("", height=100, key="user_input")
 
 def stream_chatgpt_response(prompt, placeholder):
     try:
@@ -64,8 +54,12 @@ def stream_chatgpt_response(prompt, placeholder):
             model="gpt-4",
             messages=[
                 {"role": "system", "content": """당신은 따뜻하고 공감적인 SKMS 전문가입니다. 
-                질문자의 고민에 깊이 공감하면서, SKMS의 경영철학과 가치를 기반으로 답변해주세요."""},
-                {"role": "user", "content": f"질문: {prompt}"}
+                질문자의 고민에 깊이 공감하면서, SKMS의 경영철학과 가치를 기반으로 답변해주세요.
+                답변 시에는 친근하고 이해하기 쉬운 표현을 사용하되, 전문성은 유지해주세요.
+                질문에 대한 직접적인 내용이 SKMS에 없더라도, SKMS의 경영철학과 핵심가치를 바탕으로 
+                건설적이고 희망적인 관점에서 답변을 제공해주세요.
+                답변 시 참고한 SKMS의 관련 내용이나 철학을 자연스럽게 연결하여 설명해주세요."""},
+                {"role": "user", "content": f"SKMS: {SKMS_CONTENT}\n\n질문: {prompt}"}
             ],
             stream=True
         )
@@ -76,12 +70,8 @@ def stream_chatgpt_response(prompt, placeholder):
         placeholder.markdown(message)
         return message
     except Exception as e:
-        # 에러가 발생하면 재시도
-        try:
-            return stream_chatgpt_response(prompt, placeholder)
-        except:
-            placeholder.error(f"ChatGPT Error: {str(e)}")
-            return f"ChatGPT Error: {str(e)}"
+        placeholder.error(f"ChatGPT Error: {str(e)}")
+        return f"ChatGPT Error: {str(e)}"
 
 def stream_claude_response(prompt, placeholder):
     try:
@@ -147,13 +137,8 @@ def get_final_synthesis(prompt, placeholder):
             max_tokens=1000,
             system="""당신은 SKMS 전문가입니다.
             각 AI의 답변들을 종합하여 SKMS의 관점에서 가장 핵심적이고 통찰력 있는 답변을 제시해주세요.
-            
-            답변 시 반드시 지켜야 할 규칙:
-            1. 최소 2개 이상의 AI 답변에서 공통적으로 언급된 관점을 중심으로 답변을 구성하세요.
-            2. SKMS 원문의 내용과 모순되지 않도록 답변하세요.
-            
-            답변 시 SKMS의 철학과 가치를 자연스럽게 연결하여 설명해주시고,
-            여러 AI의 답변 중 서로 보완되는 관점들을 잘 통합해서 설명해주세요.""",
+            답변 시 SKMS의 철학과 가치를 자연스럽게 연결하여 설명해주세요.
+            여러 AI의 답변 중 중복되는 중요한 관점이나, 서로 보완되는 관점들을 잘 통합해서 설명해주세요.""",
             messages=[{
                 "role": "user",
                 "content": f"""
@@ -161,7 +146,7 @@ def get_final_synthesis(prompt, placeholder):
 
                 ChatGPT의 답변: {chatgpt_response}
                 
-                Claude�� 답변: {claude_response}
+                Claude의 답변: {claude_response}
                 
                 Gemini의 답변: {gemini_response}
                 """
@@ -224,5 +209,4 @@ if st.button("답변 생성하기"):
             Gemini의 답변: {gemini_response}
             """
             
-            get_final_synthesis(synthesis_prompt, synthesis_placeholder)
-            
+            get_final_synthesis(synthesis_prompt, synthesis_placeholder) 
