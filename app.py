@@ -32,6 +32,11 @@ st.markdown("""
         border: none;
         border-top: 1px solid #e1e4e8;
     }
+    /* 페이지 전체 여백 설정 */
+    .block-container {
+        padding-left: 15rem !important;
+        padding-right: 15rem !important;
+    }
     </style>
 """, unsafe_allow_html=True)
 
