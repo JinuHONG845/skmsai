@@ -36,7 +36,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 def stream_chatgpt_response(prompt, placeholder):
-    retries = 3
+    retries = 1
     for attempt in range(retries):
         try:
             message = ""
@@ -68,15 +68,15 @@ def stream_chatgpt_response(prompt, placeholder):
             else:
                 error_display = f"OpenAI 서버 오류: {error_message}"
             
-            if attempt < retries - 1:
-                placeholder.warning(f"{error_display}... {attempt + 1}번째 재시도 중")
+            if attempt < retries:
+                placeholder.warning(f"{error_display}... 재시도 중")
                 time.sleep(2)
                 continue
             placeholder.error(error_display)
             return f"ChatGPT Error: {error_display}"
 
 def stream_claude_response(prompt, placeholder):
-    retries = 3
+    retries = 1
     for attempt in range(retries):
         try:
             message = ""
@@ -108,15 +108,15 @@ def stream_claude_response(prompt, placeholder):
             else:
                 error_display = f"Anthropic 서버 오류: {error_message}"
             
-            if attempt < retries - 1:
-                placeholder.warning(f"{error_display}... {attempt + 1}번째 재시도 중")
+            if attempt < retries:
+                placeholder.warning(f"{error_display}... 재시도 중")
                 time.sleep(2)
                 continue
             placeholder.error(error_display)
             return f"Claude Error: {error_display}"
 
 def stream_gemini_response(prompt, placeholder):
-    retries = 3
+    retries = 1
     for attempt in range(retries):
         try:
             message = ""
@@ -152,8 +152,8 @@ def stream_gemini_response(prompt, placeholder):
             else:
                 error_display = f"Google AI 서버 오류: {error_message}"
             
-            if attempt < retries - 1:
-                placeholder.warning(f"{error_display}... {attempt + 1}번째 재시도 중")
+            if attempt < retries:
+                placeholder.warning(f"{error_display}... 재시도 중")
                 time.sleep(2)
                 continue
             placeholder.error(error_display)
