@@ -148,29 +148,68 @@ def stream_gemini_response(prompt, placeholder):
     for attempt in range(retries):
         try:
             message = ""
-            model = genai.GenerativeModel('gemini-pro')
-            response = model.generate_content(
-                f"""당신은 따뜻하고 공감적인 SKMS 전문가입니다. 
+            # 안정적인 구성을 위한 설정
+            generation_config = {
+                "temperature": 0.9,
+                "top_p": 1,
+                "top_k": 1,
+                "max_output_tokens": 2048,
+            }
+            
+            safety_settings = [
+                {
+                    "category": "HARM_CATEGORY_HARASSMENT",
+                    "threshold": "BLOCK_NONE"
+                },
+                {
+                    "category": "HARM_CATEGORY_HATE_SPEECH",
+                    "threshold": "BLOCK_NONE"
+                },
+                {
+                    "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                    "threshold": "BLOCK_NONE"
+                },
+                {
+                    "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+                    "threshold": "BLOCK_NONE"
+                },
+            ]
+
+            model = genai.GenerativeModel(
+                model_name='gemini-pro',
+                generation_config=generation_config,
+                safety_settings=safety_settings
+            )
+
+            prompt_parts = [
+                """당신은 따뜻하고 공감적인 SKMS 전문가입니다. 
                 질문자의 고민에 깊이 공감하면서, SKMS의 경영철학과 가치를 기반으로 답변해주세요.
                 답변 시에는 친근하고 이해하기 쉬운 표현을 사용하되, 전문성은 유지해주세요.
                 질문에 대한 직접적인 내용이 SKMS에 없더라도, SKMS의 경영철학과 핵심가치를 바탕으로 
                 건설적이고 희망적인 관점에서 답변을 제공해주세요.
-                답변 시 참고한 SKMS의 관련 내용이나 철학을 자연스럽게 연결하여 설명해주세요.
-                
-                SKMS: {SKMS_CONTENT}
-                
-                질문: {prompt}""",
-                stream=True
+                답변 시 참고한 SKMS의 관련 내용이나 철학을 자연스럽게 연결하여 설명해주세요.""",
+                f"\nSKMS: {SKMS_CONTENT}",
+                f"\n질문: {prompt}"
+            ]
+
+            response = model.generate_content(
+                prompt_parts,
+                stream=True,
             )
-            
+
             for chunk in response:
-                if hasattr(chunk, 'parts'):
+                if hasattr(chunk, 'text'):
+                    message += chunk.text
+                    placeholder.markdown(message + "▌")
+                elif hasattr(chunk, 'parts'):
                     for part in chunk.parts:
                         if hasattr(part, 'text'):
                             message += part.text
                             placeholder.markdown(message + "▌")
+            
             placeholder.markdown(message)
             return message
+
         except Exception as e:
             error_message = str(e)
             if "503" in error_message:
@@ -195,7 +234,7 @@ def get_final_synthesis(prompt, placeholder):
             max_tokens=1000,
             system="""당신은 SKMS 전문가입니다.
             각 AI의 답변들을 종합하여 SKMS의 관점에서 가장 핵심적이고 통찰력 있는 답변을 제시해주세요.
-            답변 시 SKMS의 철학과 가치를 자연스럽�� 연결하여 설명해주세요.
+            답변 시 SKMS의 철학과 가치를 자연스럽게 연결하여 설명해주세요.
             
             반드시 지켜야 할 규칙:
             1. 최소 2개 이상의 다른 응답들과 공통되는 관점을 중심으로 답변하세요.
