@@ -32,10 +32,15 @@ st.markdown("""
         border: none;
         border-top: 1px solid #e1e4e8;
     }
-    /* 페이지 전체 여백 설정 */
+    /* 페이지 전체 여백과 중앙 정렬 설정 */
     .block-container {
-        padding-left: 15rem !important;
-        padding-right: 15rem !important;
+        max-width: 1000px !important;
+        padding: 2rem 5rem !important;
+        margin: 0 auto !important;
+    }
+    .stApp {
+        max-width: 1200px;
+        margin: 0 auto;
     }
     </style>
 """, unsafe_allow_html=True)
