@@ -34,19 +34,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 상단에 로고 배치
-col1, col2 = st.columns([1, 4])
-
-with col1:
-    st.image("1200px-SK_logo.svg.png", width=100)
-
-# 메인 타이틀과 설명
-st.title("SKMS AI Assistant")
-st.write("SKMS를 기반으로 AI가 답변해드립니다. 여러분의 고민을 말씀해 주세요.")
-
-# 사용자 입력과 버튼
-user_prompt = st.text_area("", height=100, key="user_input")
-
 def stream_chatgpt_response(prompt, placeholder):
     try:
         message = ""
