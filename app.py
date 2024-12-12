@@ -35,12 +35,30 @@ st.markdown("""
     /* 페이지 전체 여백과 중앙 정렬 설정 */
     .block-container {
         max-width: 1000px !important;
-        padding: 2rem 5rem !important;
         margin: 0 auto !important;
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+        padding-left: 5% !important;
+        padding-right: 5% !important;
     }
     .stApp {
         max-width: 1200px;
         margin: 0 auto;
+    }
+    /* 모바일 환경 대응 */
+    @media (max-width: 768px) {
+        .block-container {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }
+        .stTextArea > div > div > textarea {
+            width: 100% !important;
+        }
+    }
+    /* 입력창 중앙 정렬 */
+    .stTextArea > div {
+        width: 100% !important;
+        margin: 0 auto !important;
     }
     </style>
 """, unsafe_allow_html=True)
