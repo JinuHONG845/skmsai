@@ -69,7 +69,7 @@ def stream_chatgpt_response(prompt, placeholder):
         try:
             message = ""
             stream = openai_client.chat.completions.create(
-                model="gpt-4",
+                model="gpt-4-turbo-preview",
                 messages=[
                     {"role": "system", "content": """당신은 따뜻하고 공감적인 SKMS 전문가입니다. 
                     질문자의 고민에 깊이 공감하면서, SKMS의 경영철학과 가치를 기반으로 답변해주세요.
@@ -195,7 +195,7 @@ def get_final_synthesis(prompt, placeholder):
             max_tokens=1000,
             system="""당신은 SKMS 전문가입니다.
             각 AI의 답변들을 종합하여 SKMS의 관점에서 가장 핵심적이고 통찰력 있는 답변을 제시해주세요.
-            답변 시 SKMS의 철학과 가치를 자연스럽게 연결하여 설명해주세요.
+            답변 시 SKMS의 철학과 가치를 자연스럽�� 연결하여 설명해주세요.
             
             반드시 지켜야 할 규칙:
             1. 최소 2개 이상의 다른 응답들과 공통되는 관점을 중심으로 답변하세요.
