@@ -213,8 +213,8 @@ def stream_gemini_response(prompt, placeholder):
             return f"Gemini Error: {error_display}"
 
 # Streamlit UI
-st.title("AI Assistant")
-st.write("AI가 답변해드립니다. 여러분의 고민을 말씀해 주세요.")
+st.title("LLM Big5 비교 (v.250217)")
+st.write("Deepseek이 포함되어 있습니다. 보안에 유의하여 주세요")
 
 # 세션 상태 초기화
 if 'previous_input' not in st.session_state:
