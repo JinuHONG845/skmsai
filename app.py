@@ -257,21 +257,54 @@ def stream_deepseek_response(prompt, placeholder):
             placeholder.error(error_display)
             return f"Deepseek Error: {error_display}"
 
-def get_grok_response(prompt):
-    url = "https://api.grok.com/v1/chat/completions"
-    headers = {
-        "Authorization": f"Bearer {st.secrets['GROK_API_KEY']}",
-        "Content-Type": "application/json"
-    }
-    data = {
-        "model": "grok-1",
-        "messages": [
-            {"role": "system", "content": "당신은 따뜻하고 공감적인 AI 어시스턴트입니다."},
-            {"role": "user", "content": prompt}
-        ]
-    }
-    response = requests.post(url, headers=headers, json=data)
-    return response.json()
+def stream_grok_response(prompt, placeholder):
+    retries = 1
+    for attempt in range(retries):
+        try:
+            message = ""
+            url = "https://api.grok.com/v1/chat/completions"
+            headers = {
+                "Authorization": f"Bearer {st.secrets['GROK_API_KEY']}",
+                "Content-Type": "application/json"
+            }
+            data = {
+                "model": "grok-1",
+                "messages": [
+                    {"role": "system", "content": """당신은 따뜻하고 공감적인 AI 어시스턴트입니다. 
+                    질문자의 고민에 깊이 공감하면서, 건설적이고 전문적인 관점에서 답변해주세요.
+                    답변 시에는 친근하고 이해하기 쉬운 표현을 사용하되, 전문성은 유지해주세요."""},
+                    {"role": "user", "content": prompt}
+                ],
+                "stream": True
+            }
+            
+            response = requests.post(url, headers=headers, json=data, stream=True)
+            for line in response.iter_lines():
+                if line:
+                    chunk = line.decode('utf-8')
+                    if chunk.startswith('data: '):
+                        content = chunk[6:]  # 'data: ' 제거
+                        message += content
+                        placeholder.markdown(message + "▌")
+            
+            placeholder.markdown(message)
+            return message
+            
+        except Exception as e:
+            error_message = str(e)
+            if "503" in error_message:
+                error_display = "Grok 서버가 일시적으로 응답하지 않습니다 (503 Service Unavailable)"
+            elif "timeout" in error_message.lower():
+                error_display = "Grok 서버 응답 시간 초과"
+            else:
+                error_display = f"Grok 서버 오류: {error_message}"
+            
+            if attempt < retries:
+                placeholder.warning(f"{error_display}... 재시도 중")
+                time.sleep(2)
+                continue
+            placeholder.error(error_display)
+            return f"Grok Error: {error_display}"
 
 # Streamlit UI
 st.title("LLM Big5 비교 (v.250217)")
@@ -316,5 +349,5 @@ if st.button("답변 생성하기"):
             # Grok 답변
             st.markdown('<div class="llm-header">Grok 답변</div>', unsafe_allow_html=True)
             grok_placeholder = st.empty()
-            grok_response = get_grok_response(user_prompt)
+            grok_response = stream_grok_response(user_prompt, grok_placeholder)
             st.markdown('<div class="response-divider"></div>', unsafe_allow_html=True) 
