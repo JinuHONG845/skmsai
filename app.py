@@ -74,7 +74,7 @@ def stream_chatgpt_response(prompt, placeholder):
         try:
             message = ""
             stream = openai_client.chat.completions.create(
-                model="gpt-4o-turbo-preview",
+                model="gpt-4-turbo-preview",
                 messages=[{"role": "user", "content": prompt}],
                 stream=True
             )
@@ -304,7 +304,7 @@ if st.button("답변 생성하기"):
         st.session_state.previous_input = user_prompt
         
         # ChatGPT 답변
-        st.markdown('<div class="llm-header">ChatGPT (GPT-4O Turbo Preview) 답변</div>', unsafe_allow_html=True)
+        st.markdown('<div class="llm-header">ChatGPT (GPT-4o Turbo Preview) 답변</div>', unsafe_allow_html=True)
         chatgpt_placeholder = st.empty()
         chatgpt_response = stream_chatgpt_response(user_prompt, chatgpt_placeholder)
         st.markdown('<div class="response-divider"></div>', unsafe_allow_html=True)
