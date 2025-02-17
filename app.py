@@ -6,7 +6,7 @@ import time
 import requests
 
 # Streamlit 페이지 설정
-st.set_page_config(page_title="SKMS AI Assistant", layout="wide")
+st.set_page_config(page_title="LLM Big5", layout="wide")
 
 # API 클라이언트 초기화
 openai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
@@ -281,7 +281,12 @@ def stream_grok_response(prompt, placeholder):
 
 # Streamlit UI
 st.title("LLM Big5 비교 (v.250217)")
-st.write("Deepseek이 포함되어 있습니다. 보안에 유의하여 주세요")
+st.markdown("""
+    <div style='padding: 10px; background-color: #ffebee; border-left: 5px solid #f44336; margin: 10px 0;'>
+        <strong style='color: #d32f2f;'>⚠️ 보안 주의사항:</strong>
+        <span style='color: #333;'> Deepseek이 포함되어 있으므로 민감한 정보 입력에 주의해 주세요.</span>
+    </div>
+""", unsafe_allow_html=True)
 
 # 세션 상태 초기화
 if 'previous_input' not in st.session_state:
