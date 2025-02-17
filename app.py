@@ -2,6 +2,9 @@ import streamlit as st
 from openai import OpenAI
 from anthropic import Anthropic
 import google.generativeai as genai
+# Deepseek와 Grok의 가상 클라이언트 라이브러리
+from deepseek import DeepseekAI  # 가정된 라이브러리
+from grok import GrokAI  # 가정된 라이브러리
 import time
 
 # Streamlit 페이지 설정
@@ -11,6 +14,8 @@ st.set_page_config(page_title="SKMS AI Assistant", layout="wide")
 openai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 anthropic_client = Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
+deepseek_client = DeepseekAI(api_key=st.secrets["DEEPSEEK_API_KEY"])
+grok_client = GrokAI(api_key=st.secrets["GROK_API_KEY"])
 
 # 상단에 CSS 스타일 추가
 st.markdown("""
@@ -212,6 +217,80 @@ def stream_gemini_response(prompt, placeholder):
             placeholder.error(error_display)
             return f"Gemini Error: {error_display}"
 
+def stream_deepseek_response(prompt, placeholder):
+    retries = 1
+    for attempt in range(retries):
+        try:
+            message = ""
+            stream = deepseek_client.chat.completions.create(
+                model="deepseek-chat",
+                messages=[
+                    {"role": "system", "content": """당신은 따뜻하고 공감적인 AI 어시스턴트입니다. 
+                    질문자의 고민에 깊이 공감하면서, 건설적이고 전문적인 관점에서 답변해주세요.
+                    답변 시에는 친근하고 이해하기 쉬운 표현을 사용하되, 전문성은 유지해주세요."""},
+                    {"role": "user", "content": prompt}
+                ],
+                stream=True
+            )
+            for chunk in stream:
+                if chunk.choices[0].delta.content is not None:
+                    message += chunk.choices[0].delta.content
+                    placeholder.markdown(message + "▌")
+            placeholder.markdown(message)
+            return message
+        except Exception as e:
+            error_message = str(e)
+            if "503" in error_message:
+                error_display = "Deepseek 서버가 일시적으로 응답하지 않습니다 (503 Service Unavailable)"
+            elif "timeout" in error_message.lower():
+                error_display = "Deepseek 서버 응답 시간 초과"
+            else:
+                error_display = f"Deepseek 서버 오류: {error_message}"
+            
+            if attempt < retries:
+                placeholder.warning(f"{error_display}... 재시도 중")
+                time.sleep(2)
+                continue
+            placeholder.error(error_display)
+            return f"Deepseek Error: {error_display}"
+
+def stream_grok_response(prompt, placeholder):
+    retries = 1
+    for attempt in range(retries):
+        try:
+            message = ""
+            stream = grok_client.chat.completions.create(
+                model="grok-1",
+                messages=[
+                    {"role": "system", "content": """당신은 따뜻하고 공감적인 AI 어시스턴트입니다. 
+                    질문자의 고민에 깊이 공감하면서, 건설적이고 전문적인 관점에서 답변해주세요.
+                    답변 시에는 친근하고 이해하기 쉬운 표현을 사용하되, 전문성은 유지해주세요."""},
+                    {"role": "user", "content": prompt}
+                ],
+                stream=True
+            )
+            for chunk in stream:
+                if chunk.choices[0].delta.content is not None:
+                    message += chunk.choices[0].delta.content
+                    placeholder.markdown(message + "▌")
+            placeholder.markdown(message)
+            return message
+        except Exception as e:
+            error_message = str(e)
+            if "503" in error_message:
+                error_display = "Grok 서버가 일시적으로 응답하지 않습니다 (503 Service Unavailable)"
+            elif "timeout" in error_message.lower():
+                error_display = "Grok 서버 응답 시간 초과"
+            else:
+                error_display = f"Grok 서버 오류: {error_message}"
+            
+            if attempt < retries:
+                placeholder.warning(f"{error_display}... 재시도 중")
+                time.sleep(2)
+                continue
+            placeholder.error(error_display)
+            return f"Grok Error: {error_display}"
+
 # Streamlit UI
 st.title("LLM Big5 비교 (v.250217)")
 st.write("Deepseek이 포함되어 있습니다. 보안에 유의하여 주세요")
@@ -244,4 +323,16 @@ if st.button("답변 생성하기"):
             st.markdown('<div class="llm-header">Gemini 답변</div>', unsafe_allow_html=True)
             gemini_placeholder = st.empty()
             gemini_response = stream_gemini_response(user_prompt, gemini_placeholder)
+            st.markdown('<div class="response-divider"></div>', unsafe_allow_html=True)
+            
+            # Deepseek 답변
+            st.markdown('<div class="llm-header">Deepseek 답변</div>', unsafe_allow_html=True)
+            deepseek_placeholder = st.empty()
+            deepseek_response = stream_deepseek_response(user_prompt, deepseek_placeholder)
+            st.markdown('<div class="response-divider"></div>', unsafe_allow_html=True)
+            
+            # Grok 답변
+            st.markdown('<div class="llm-header">Grok 답변</div>', unsafe_allow_html=True)
+            grok_placeholder = st.empty()
+            grok_response = stream_grok_response(user_prompt, grok_placeholder)
             st.markdown('<div class="response-divider"></div>', unsafe_allow_html=True) 
