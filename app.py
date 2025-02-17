@@ -3,7 +3,6 @@ from openai import OpenAI
 from anthropic import Anthropic
 import google.generativeai as genai
 # Deepseek와 Grok의 가상 클라이언트 라이브러리
-from deepseek import DeepseekAI  # 가정된 라이브러리
 from grok import GrokAI  # 가정된 라이브러리
 import time
 import requests
