@@ -7,10 +7,6 @@ import time
 # Streamlit 페이지 설정
 st.set_page_config(page_title="SKMS AI Assistant", layout="wide")
 
-# SKMS 문서 로드
-with open('skms.txt', 'r', encoding='utf-8') as file:
-    SKMS_CONTENT = file.read()
-
 # API 클라이언트 초기화
 openai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 anthropic_client = Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
@@ -71,13 +67,10 @@ def stream_chatgpt_response(prompt, placeholder):
             stream = openai_client.chat.completions.create(
                 model="gpt-4-turbo-preview",
                 messages=[
-                    {"role": "system", "content": """당신은 따뜻하고 공감적인 SKMS 전문가입니다. 
-                    질문자의 고민에 깊이 공감하면서, SKMS의 경영철학과 가치를 기반으로 답변해주세요.
-                    답변 시에는 친근하고 이해하기 쉬운 표현을 사용하되, 전문성은 유지해주세요.
-                    질문에 대한 직접적인 내용이 SKMS에 없더라도, SKMS의 경영철학과 핵심가치를 바탕으로 
-                    건설적이고 희망적인 관점에서 답변을 제공해주세요.
-                    답변 시 참고한 SKMS의 관련 내용이나 철학을 자연스럽게 연결하여 설명해주세요."""},
-                    {"role": "user", "content": f"SKMS: {SKMS_CONTENT}\n\n질문: {prompt}"}
+                    {"role": "system", "content": """당신은 따뜻하고 공감적인 AI 어시스턴트입니다. 
+                    질문자의 고민에 깊이 공감하면서, 건설적이고 전문적인 관점에서 답변해주세요.
+                    답변 시에는 친근하고 이해하기 쉬운 표현을 사용하되, 전문성은 유지해주세요."""},
+                    {"role": "user", "content": prompt}
                 ],
                 stream=True
             )
@@ -111,15 +104,12 @@ def stream_claude_response(prompt, placeholder):
             with anthropic_client.messages.stream(
                 model="claude-3-sonnet-20240229",
                 max_tokens=1000,
-                system="""당신은 따뜻하고 공감적인 SKMS 전문가입니다. 
-                질문자의 고민에 깊이 공감하면서, SKMS의 경영철학과 가치를 기반으로 답변해주세요.
-                답변 시에는 친근하고 이해하기 쉬운 표현을 사용하되, 전문성은 유지해주세요.
-                질문에 대한 직접적인 내용이 SKMS에 없더라도, SKMS의 경영철학과 핵심가치를 바탕으로 
-                건설적이고 희망적인 관점에서 답변을 제공해주세요.
-                답변 시 참고한 SKMS의 관련 내용이나 철학을 자연스럽게 연결하여 설명해주세요.""",
+                system="""당신은 따뜻하고 공감적인 AI 어시스턴트입니다. 
+                질문자의 고민에 깊이 공감하면서, 건설적이고 전문적인 관점에서 답변해주세요.
+                답변 시에는 친근하고 이해하기 쉬운 표현을 사용하되, 전문성은 유지해주세요.""",
                 messages=[{
                     "role": "user",
-                    "content": f"SKMS: {SKMS_CONTENT}\n\n질문: {prompt}"
+                    "content": prompt
                 }]
             ) as stream:
                 for text in stream.text_stream:
@@ -182,13 +172,9 @@ def stream_gemini_response(prompt, placeholder):
             )
 
             prompt_parts = [
-                """당신은 따뜻하고 공감적인 SKMS 전문가입니다. 
-                질문자의 고민에 깊이 공감하면서, SKMS의 경영철학과 가치를 기반으로 답변해주세요.
-                답변 시에는 친근하고 이해하기 쉬운 표현을 사용하되, 전문성은 유지해주세요.
-                질문에 대한 직접적인 내용이 SKMS에 없더라도, SKMS의 경영철학과 핵심가치를 바탕으로 
-                건설적이고 희망적인 관점에서 답변을 제공해주세요.
-                답변 시 참고한 SKMS의 관련 내용이나 철학을 자연스럽게 연결하여 설명해주세요.""",
-                f"\nSKMS: {SKMS_CONTENT}",
+                """당신은 따뜻하고 공감적인 AI 어시스턴트입니다. 
+                질문자의 고민에 깊이 공감하면서, 건설적이고 전문적인 관점에서 답변해주세요.
+                답변 시에는 친근하고 이해하기 쉬운 표현을 사용하되, 전문성은 유지해주세요.""",
                 f"\n질문: {prompt}"
             ]
 
@@ -226,48 +212,11 @@ def stream_gemini_response(prompt, placeholder):
             placeholder.error(error_display)
             return f"Gemini Error: {error_display}"
 
-def get_final_synthesis(prompt, placeholder):
-    try:
-        message = ""
-        with anthropic_client.messages.stream(
-            model="claude-3-sonnet-20240229",
-            max_tokens=1000,
-            system="""당신은 SKMS 전문가입니다.
-            각 AI의 답변들을 종합하여 SKMS의 관점에서 가장 핵심적이고 통찰력 있는 답변을 제시해주세요.
-            답변 시 SKMS의 철학과 가치를 자연스럽게 연결하여 설명해주세요.
-            
-            반드시 지켜야 할 규칙:
-            1. 최소 2개 이상의 다른 응답들과 공통되는 관점을 중심으로 답변하세요.
-            2. SKMS 원문의 내용과 모순되지 않도록 답변하세요.
-            
-            여러 AI의 답변 중 중복되는 중요한 관점이나, 서로 보완되는 관점들을 잘 통합해서 설명해주세요.""",
-            messages=[{
-                "role": "user",
-                "content": f"""
-                원본 질문: {prompt}
-
-                ChatGPT의 답변: {chatgpt_response}
-                
-                Claude의 답변: {claude_response}
-                
-                Gemini의 답변: {gemini_response}
-                """
-            }]
-        ) as stream:
-            for text in stream.text_stream:
-                message += text
-                placeholder.markdown(message + "▌")
-        placeholder.markdown(message)
-        return message
-    except Exception as e:
-        placeholder.error(f"Synthesis Error: {str(e)}")
-        return f"Synthesis Error: {str(e)}"
-
 # Streamlit UI
-st.title("SKMS AI Assistant")
-st.write("SKMS를 기반으로 AI가 답변해드립니다. 여러분의 고민을 말씀해 주세요.")
+st.title("AI Assistant")
+st.write("AI가 답변해드립니다. 여러분의 고민을 말씀해 주세요.")
 
-# 세션 상태 초기화 (필요한 경우)
+# 세션 상태 초기화
 if 'previous_input' not in st.session_state:
     st.session_state.previous_input = ""
 
@@ -295,20 +244,4 @@ if st.button("답변 생성하기"):
             st.markdown('<div class="llm-header">Gemini 답변</div>', unsafe_allow_html=True)
             gemini_placeholder = st.empty()
             gemini_response = stream_gemini_response(user_prompt, gemini_placeholder)
-            st.markdown('<div class="response-divider"></div>', unsafe_allow_html=True)
-            
-            # 종합 답변
-            st.markdown('<div class="llm-header">종합 답변</div>', unsafe_allow_html=True)
-            synthesis_placeholder = st.empty()
-            
-            synthesis_prompt = f"""
-            원본 질문: {user_prompt}
-
-            ChatGPT의 답변: {chatgpt_response}
-            
-            Claude의 답변: {claude_response}
-            
-            Gemini의 답변: {gemini_response}
-            """
-            
-            get_final_synthesis(synthesis_prompt, synthesis_placeholder) 
+            st.markdown('<div class="response-divider"></div>', unsafe_allow_html=True) 
