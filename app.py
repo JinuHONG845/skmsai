@@ -16,7 +16,10 @@ deepseek_client = OpenAI(
     api_key=st.secrets["DEEPSEEK_API_KEY"], 
     base_url="https://api.deepseek.com"
 )
-grok_client = GrokAI(api_key=st.secrets["GROK_API_KEY"])
+grok_client = OpenAI(
+    api_key=st.secrets["GROK_API_KEY"],
+    base_url="https://api.x.ai/v1"
+)
 
 # 상단에 CSS 스타일 추가
 st.markdown("""
@@ -72,12 +75,7 @@ def stream_chatgpt_response(prompt, placeholder):
             message = ""
             stream = openai_client.chat.completions.create(
                 model="gpt-4-turbo-preview",
-                messages=[
-                    {"role": "system", "content": """당신은 따뜻하고 공감적인 AI 어시스턴트입니다. 
-                    질문자의 고민에 깊이 공감하면서, 건설적이고 전문적인 관점에서 답변해주세요.
-                    답변 시에는 친근하고 이해하기 쉬운 표현을 사용하되, 전문성은 유지해주세요."""},
-                    {"role": "user", "content": prompt}
-                ],
+                messages=[{"role": "user", "content": prompt}],
                 stream=True
             )
             for chunk in stream:
@@ -110,9 +108,6 @@ def stream_claude_response(prompt, placeholder):
             with anthropic_client.messages.stream(
                 model="claude-3-sonnet-20240229",
                 max_tokens=1000,
-                system="""당신은 따뜻하고 공감적인 AI 어시스턴트입니다. 
-                질문자의 고민에 깊이 공감하면서, 건설적이고 전문적인 관점에서 답변해주세요.
-                답변 시에는 친근하고 이해하기 쉬운 표현을 사용하되, 전문성은 유지해주세요.""",
                 messages=[{
                     "role": "user",
                     "content": prompt
@@ -144,7 +139,6 @@ def stream_gemini_response(prompt, placeholder):
     for attempt in range(retries):
         try:
             message = ""
-            # 안정적인 구성을 위한 설정
             generation_config = {
                 "temperature": 0.9,
                 "top_p": 1,
@@ -177,15 +171,8 @@ def stream_gemini_response(prompt, placeholder):
                 safety_settings=safety_settings
             )
 
-            prompt_parts = [
-                """당신은 따뜻하고 공감적인 AI 어시스턴트입니다. 
-                질문자의 고민에 깊이 공감하면서, 건설적이고 전문적인 관점에서 답변해주세요.
-                답변 시에는 친근하고 이해하기 쉬운 표현을 사용하되, 전문성은 유지해주세요.""",
-                f"\n질문: {prompt}"
-            ]
-
             response = model.generate_content(
-                prompt_parts,
+                prompt,
                 stream=True,
             )
 
@@ -225,12 +212,7 @@ def stream_deepseek_response(prompt, placeholder):
             message = ""
             stream = deepseek_client.chat.completions.create(
                 model="deepseek-chat",
-                messages=[
-                    {"role": "system", "content": """당신은 따뜻하고 공감적인 AI 어시스턴트입니다. 
-                    질문자의 고민에 깊이 공감하면서, 건설적이고 전문적인 관점에서 답변해주세요.
-                    답변 시에는 친근하고 이해하기 쉬운 표현을 사용하되, 전문성은 유지해주세요."""},
-                    {"role": "user", "content": prompt}
-                ],
+                messages=[{"role": "user", "content": prompt}],
                 stream=True
             )
             for chunk in stream:
@@ -260,34 +242,17 @@ def stream_grok_response(prompt, placeholder):
     for attempt in range(retries):
         try:
             message = ""
-            url = "https://api.grok.com/v1/chat/completions"
-            headers = {
-                "Authorization": f"Bearer {st.secrets['GROK_API_KEY']}",
-                "Content-Type": "application/json"
-            }
-            data = {
-                "model": "grok-1",
-                "messages": [
-                    {"role": "system", "content": """당신은 따뜻하고 공감적인 AI 어시스턴트입니다. 
-                    질문자의 고민에 깊이 공감하면서, 건설적이고 전문적인 관점에서 답변해주세요.
-                    답변 시에는 친근하고 이해하기 쉬운 표현을 사용하되, 전문성은 유지해주세요."""},
-                    {"role": "user", "content": prompt}
-                ],
-                "stream": True
-            }
-            
-            response = requests.post(url, headers=headers, json=data, stream=True)
-            for line in response.iter_lines():
-                if line:
-                    chunk = line.decode('utf-8')
-                    if chunk.startswith('data: '):
-                        content = chunk[6:]  # 'data: ' 제거
-                        message += content
-                        placeholder.markdown(message + "▌")
-            
+            stream = grok_client.chat.completions.create(
+                model="grok-2-latest",
+                messages=[{"role": "user", "content": prompt}],
+                stream=True
+            )
+            for chunk in stream:
+                if chunk.choices[0].delta.content is not None:
+                    message += chunk.choices[0].delta.content
+                    placeholder.markdown(message + "▌")
             placeholder.markdown(message)
             return message
-            
         except Exception as e:
             error_message = str(e)
             if "503" in error_message:
