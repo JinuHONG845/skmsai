@@ -15,7 +15,10 @@ st.set_page_config(page_title="SKMS AI Assistant", layout="wide")
 openai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 anthropic_client = Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
-deepseek_client = DeepseekAI(api_key=st.secrets["DEEPSEEK_API_KEY"])
+deepseek_client = OpenAI(
+    api_key=st.secrets["DEEPSEEK_API_KEY"], 
+    base_url="https://api.deepseek.com"
+)
 grok_client = GrokAI(api_key=st.secrets["GROK_API_KEY"])
 
 # 상단에 CSS 스타일 추가
@@ -223,20 +226,22 @@ def stream_deepseek_response(prompt, placeholder):
     for attempt in range(retries):
         try:
             message = ""
-            url = "https://api.deepseek.com/v1/chat/completions"
-            headers = {
-                "Authorization": f"Bearer {st.secrets['DEEPSEEK_API_KEY']}",
-                "Content-Type": "application/json"
-            }
-            data = {
-                "model": "deepseek-chat",
-                "messages": [
-                    {"role": "system", "content": "당신은 따뜻하고 공감적인 AI 어시스턴트입니다."},
+            stream = deepseek_client.chat.completions.create(
+                model="deepseek-chat",
+                messages=[
+                    {"role": "system", "content": """당신은 따뜻하고 공감적인 AI 어시스턴트입니다. 
+                    질문자의 고민에 깊이 공감하면서, 건설적이고 전문적인 관점에서 답변해주세요.
+                    답변 시에는 친근하고 이해하기 쉬운 표현을 사용하되, 전문성은 유지해주세요."""},
                     {"role": "user", "content": prompt}
-                ]
-            }
-            response = requests.post(url, headers=headers, json=data)
-            return response.json()
+                ],
+                stream=True
+            )
+            for chunk in stream:
+                if chunk.choices[0].delta.content is not None:
+                    message += chunk.choices[0].delta.content
+                    placeholder.markdown(message + "▌")
+            placeholder.markdown(message)
+            return message
         except Exception as e:
             error_message = str(e)
             if "503" in error_message:
