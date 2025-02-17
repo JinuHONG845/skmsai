@@ -172,7 +172,7 @@ def stream_gemini_response(prompt, placeholder):
             ]
 
             model = genai.GenerativeModel(
-                model_name='gemini-pro',
+                model_name='gemini-2.0-flash',
                 generation_config=generation_config,
                 safety_settings=safety_settings
             )
@@ -316,7 +316,7 @@ if st.button("답변 생성하기"):
         st.markdown('<div class="response-divider"></div>', unsafe_allow_html=True)
         
         # Gemini 답변
-        st.markdown('<div class="llm-header">Gemini (Gemini Pro) 답변</div>', unsafe_allow_html=True)
+        st.markdown('<div class="llm-header">Gemini (Gemini 2.0 Flash) 답변</div>', unsafe_allow_html=True)
         gemini_placeholder = st.empty()
         gemini_response = stream_gemini_response(user_prompt, gemini_placeholder)
         st.markdown('<div class="response-divider"></div>', unsafe_allow_html=True)
