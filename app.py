@@ -256,8 +256,7 @@ def stream_grok_response(prompt, placeholder):
                 model="grok-2-latest",
                 messages=[{"role": "user", "content": prompt}],
                 stream=True,
-                response_format={"type": "text"},
-                encoding="utf-8"
+                response_format={"type": "text"}
             )
             for chunk in stream:
                 if chunk.choices[0].delta.content is not None:
