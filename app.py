@@ -255,11 +255,16 @@ def stream_grok_response(prompt, placeholder):
             stream = grok_client.chat.completions.create(
                 model="grok-2-latest",
                 messages=[{"role": "user", "content": prompt}],
-                stream=True
+                stream=True,
+                response_format={"type": "text"},
+                encoding="utf-8"
             )
             for chunk in stream:
                 if chunk.choices[0].delta.content is not None:
-                    message += chunk.choices[0].delta.content
+                    content = chunk.choices[0].delta.content
+                    if isinstance(content, bytes):
+                        content = content.decode('utf-8')
+                    message += content
                     placeholder.markdown(message + "▌")
             placeholder.markdown(message)
             return message
