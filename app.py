@@ -229,7 +229,11 @@ def stream_deepseek_response(prompt, placeholder):
             return message
         except Exception as e:
             error_message = str(e)
-            if "503" in error_message:
+            if "402" in error_message or "Insufficient Balance" in error_message:
+                error_display = "Deepseek API 잔액이 부족합니다. 관리자에게 문의해주세요."
+                placeholder.error(error_display)
+                return f"Deepseek Error: {error_display}"
+            elif "503" in error_message:
                 error_display = "Deepseek 서버가 일시적으로 응답하지 않습니다 (503 Service Unavailable)"
             elif "timeout" in error_message.lower():
                 error_display = "Deepseek 서버 응답 시간 초과"
