@@ -101,12 +101,12 @@ def stream_chatgpt_response(prompt, placeholder):
             return f"ChatGPT Error: {error_display}"
 
 def stream_claude_response(prompt, placeholder):
-    retries = 3  # 재시도 횟수를 1에서 3으로 증가
+    retries = 3
     for attempt in range(retries):
         try:
             message = ""
             with anthropic_client.messages.stream(
-                model="claude-3-sonnet",
+                model="claude-3-sonnet-20240229",
                 max_tokens=1000,
                 messages=[{
                     "role": "user",
@@ -122,7 +122,7 @@ def stream_claude_response(prompt, placeholder):
             error_message = str(e)
             if "overloaded" in str(e).lower():
                 error_display = "Anthropic 서버가 과부하 상태입니다. 잠시 후 다시 시도합니다."
-                wait_time = (attempt + 1) * 3  # 점진적으로 대기 시간 증가 (3초, 6초, 9초)
+                wait_time = (attempt + 1) * 3
             elif "503" in error_message:
                 error_display = "Anthropic 서버가 일시적으로 응답하지 않습니다 (503 Service Unavailable)"
                 wait_time = 2
@@ -133,7 +133,7 @@ def stream_claude_response(prompt, placeholder):
                 error_display = f"Anthropic 서버 오류: {error_message}"
                 wait_time = 2
             
-            if attempt < retries - 1:  # 마지막 시도가 아닌 경우에만 재시도
+            if attempt < retries - 1:
                 placeholder.warning(f"{error_display}... {wait_time}초 후 재시도")
                 time.sleep(wait_time)
                 continue
