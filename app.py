@@ -291,36 +291,35 @@ if 'previous_input' not in st.session_state:
 user_prompt = st.text_area("", height=100, key="user_input")
 
 if st.button("답변 생성하기"):
-    if user_prompt:
-        if user_prompt != st.session_state.previous_input:
-            st.session_state.previous_input = user_prompt
-            
-            # ChatGPT 답변
-            st.markdown('<div class="llm-header">ChatGPT 답변</div>', unsafe_allow_html=True)
-            chatgpt_placeholder = st.empty()
-            chatgpt_response = stream_chatgpt_response(user_prompt, chatgpt_placeholder)
-            st.markdown('<div class="response-divider"></div>', unsafe_allow_html=True)
-            
-            # Claude 답변
-            st.markdown('<div class="llm-header">Claude 답변</div>', unsafe_allow_html=True)
-            claude_placeholder = st.empty()
-            claude_response = stream_claude_response(user_prompt, claude_placeholder)
-            st.markdown('<div class="response-divider"></div>', unsafe_allow_html=True)
-            
-            # Gemini 답변
-            st.markdown('<div class="llm-header">Gemini 답변</div>', unsafe_allow_html=True)
-            gemini_placeholder = st.empty()
-            gemini_response = stream_gemini_response(user_prompt, gemini_placeholder)
-            st.markdown('<div class="response-divider"></div>', unsafe_allow_html=True)
-            
-            # Deepseek 답변
-            st.markdown('<div class="llm-header">Deepseek 답변</div>', unsafe_allow_html=True)
-            deepseek_placeholder = st.empty()
-            deepseek_response = stream_deepseek_response(user_prompt, deepseek_placeholder)
-            st.markdown('<div class="response-divider"></div>', unsafe_allow_html=True)
-            
-            # Grok 답변
-            st.markdown('<div class="llm-header">Grok 답변</div>', unsafe_allow_html=True)
-            grok_placeholder = st.empty()
-            grok_response = stream_grok_response(user_prompt, grok_placeholder)
-            st.markdown('<div class="response-divider"></div>', unsafe_allow_html=True) 
+    if user_prompt:  # 입력값이 있는 경우에만 실행
+        st.session_state.previous_input = user_prompt  # 현재 입력값을 저장
+        
+        # ChatGPT 답변
+        st.markdown('<div class="llm-header">ChatGPT 답변</div>', unsafe_allow_html=True)
+        chatgpt_placeholder = st.empty()
+        chatgpt_response = stream_chatgpt_response(user_prompt, chatgpt_placeholder)
+        st.markdown('<div class="response-divider"></div>', unsafe_allow_html=True)
+        
+        # Claude 답변
+        st.markdown('<div class="llm-header">Claude 답변</div>', unsafe_allow_html=True)
+        claude_placeholder = st.empty()
+        claude_response = stream_claude_response(user_prompt, claude_placeholder)
+        st.markdown('<div class="response-divider"></div>', unsafe_allow_html=True)
+        
+        # Gemini 답변
+        st.markdown('<div class="llm-header">Gemini 답변</div>', unsafe_allow_html=True)
+        gemini_placeholder = st.empty()
+        gemini_response = stream_gemini_response(user_prompt, gemini_placeholder)
+        st.markdown('<div class="response-divider"></div>', unsafe_allow_html=True)
+        
+        # Deepseek 답변
+        st.markdown('<div class="llm-header">Deepseek 답변</div>', unsafe_allow_html=True)
+        deepseek_placeholder = st.empty()
+        deepseek_response = stream_deepseek_response(user_prompt, deepseek_placeholder)
+        st.markdown('<div class="response-divider"></div>', unsafe_allow_html=True)
+        
+        # Grok 답변
+        st.markdown('<div class="llm-header">Grok 답변</div>', unsafe_allow_html=True)
+        grok_placeholder = st.empty()
+        grok_response = stream_grok_response(user_prompt, grok_placeholder)
+        st.markdown('<div class="response-divider"></div>', unsafe_allow_html=True) 
